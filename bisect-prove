@@ -4,6 +4,18 @@
 
 bisect-prove - a wrapper for prove and git-bisect
 
+=head1 REQUIREMENTS
+
+=over 2
+
+=item L<File::Which>
+
+=item L<IPC::Run>
+
+=item L<Test::Harness>
+
+=back
+
 =head1 SYNOPSIS
 
   $ git bisect start
@@ -85,7 +97,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 use strict;
 use warnings;
 
-use version 0.77; our $VERSION = version->declare('v0.2.0');
+use version 0.77; our $VERSION = version->declare('v0.2.1');
 
 use File::Which qw/ which /;
 use IPC::Run qw/ run /;

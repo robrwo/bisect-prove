@@ -1,6 +1,11 @@
 NAME
     bisect-prove - a wrapper for prove and git-bisect
 
+REQUIREMENTS
+    File::Which
+    IPC::Run
+    Test::Harness
+
 SYNOPSIS
       $ git bisect start
       $ git bisect good 12345678
