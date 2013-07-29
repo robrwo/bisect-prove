@@ -1,0 +1,126 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+bisect-prove - a wrapper for prove and git-bisect
+
+=head1 SYNOPSIS
+
+  $ git bisect start
+  $ git bisect good 12345678
+  $ bisect-prove -lr t/
+
+=head1 DESCRIPTION
+
+This script is a wrapper around L<prove> that uses C<git-bisect> to
+search for the first commit that causes tests to fail.
+
+All options are passed to the C<prove> command.
+
+If you wish to see the output of C<git-bisect>, run the program with
+the C<BISECT_PROVE> variable set, e.g.
+
+  BISECT_PROVE=1 bisect-prove -lr t/
+
+=head1 SEE ALSO
+
+=over 2
+
+=item *
+
+L<prove|http://search.cpan.org/dist/Test-Harness/bin/prove>
+
+=item *
+
+L<git-bisect|http://git-scm.com/docs/git-bisect>
+
+=back
+
+=head1 AUTHOR
+
+Robert Rothenberg, C<< <rrwo at cpan.org> >>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2013 Robert Rothenberg.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the the Artistic License (2.0). You may obtain a
+copy of the full license at:
+
+L<http://www.perlfoundation.org/artistic_license_2_0>
+
+Any use, modification, and distribution of the Standard or Modified
+Versions is governed by this Artistic License. By using, modifying or
+distributing the Package, you accept this license. Do not use, modify,
+or distribute the Package, if you do not accept this license.
+
+If your Modified Version has been derived from a Modified Version made
+by someone other than you, you are nevertheless required to ensure that
+your Modified Version complies with the requirements of this license.
+
+This license does not grant you the right to use any trademark, service
+mark, tradename, or logo of the Copyright Holder.
+
+This license includes the non-exclusive, worldwide, free-of-charge
+patent license to make, have made, use, offer to sell, sell, import and
+otherwise transfer the Package with respect to any patent claims
+licensable by the Copyright Holder that are necessarily infringed by the
+Package. If you institute patent litigation (including a cross-claim or
+counterclaim) against any party alleging that the Package constitutes
+direct or contributory patent infringement, then this Artistic License
+to you shall terminate on the date that such litigation is filed.
+
+Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
+AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
+THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
+YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
+CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
+CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+=cut
+
+use strict;
+use warnings;
+
+use version 0.77; our $VERSION = version->declare('v0.2.0');
+
+use File::Which qw/ which /;
+use IPC::Run qw/ run /;
+
+my $prove = which 'prove'
+    or die "Cannot find 'prove' in the path\n";
+
+my $git = which 'git'
+    or die "Cannot find 'git' in the path\n";
+
+my ($in, $out, $err);
+
+my $checking = 1;
+
+while ($checking) {
+
+    run [$prove, @ARGV], \$in, \$out, \$err;    
+
+    if (my $rc = $?) {
+
+	run [$git, qw( bisect bad )], \$in, \$out, \$err;
+
+    } else {
+
+	run [$git, qw( bisect good )], \$in, \$out, \$err;
+
+    }
+
+    if ($out =~ /([0-9a-f]+) is the first bad commit/) {
+	$checking = 0;
+	print $out;
+    } elsif ($ENV{BISECT_PROVE}) {
+	print $out;
+    }
+
+}
+
+
