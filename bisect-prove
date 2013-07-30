@@ -4,6 +4,8 @@
 
 bisect-prove - a wrapper for prove and git-bisect
 
+=begin readme
+
 =head1 REQUIREMENTS
 
 =over 2
@@ -12,9 +14,15 @@ bisect-prove - a wrapper for prove and git-bisect
 
 =item L<IPC::Run>
 
+=item L<List::MoreUtils>
+
+=item L<Pod::Usage>
+
 =item L<Test::Harness>
 
 =back
+
+=end readme
 
 =head1 SYNOPSIS
 
@@ -51,6 +59,8 @@ L<git-bisect|http://git-scm.com/docs/git-bisect>
 =head1 AUTHOR
 
 Robert Rothenberg, C<< <rrwo at cpan.org> >>
+
+=begin readme
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -92,15 +102,23 @@ CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
 CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+=end readme
+
 =cut
 
 use strict;
 use warnings;
 
-use version 0.77; our $VERSION = version->declare('v0.2.1');
+use version 0.77; our $VERSION = version->declare('v0.3.0');
 
 use File::Which qw/ which /;
 use IPC::Run qw/ run /;
+use List::MoreUtils qw/ any /;
+use Pod::Usage;
+
+if (any { /^(-[?h]|--help)$/ } @ARGV) {
+    usage();
+}
 
 my $prove = which 'prove'
     or die "Cannot find 'prove' in the path\n";
@@ -114,7 +132,7 @@ my $checking = 1;
 
 while ($checking) {
 
-    run [$prove, @ARGV], \$in, \$out, \$err;    
+    run [$prove, @ARGV], \$in, \$out, \$err;
 
     if (my $rc = $?) {
 
@@ -135,4 +153,11 @@ while ($checking) {
 
 }
 
-
+sub usage {
+    pod2usage(
+        {
+            -message => "bisect-prove [options]",
+            -exitval => 2,
+            -verbose => 2,
+        });
+}
