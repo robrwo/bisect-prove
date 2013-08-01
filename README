@@ -2,6 +2,7 @@ NAME
     bisect-prove - a wrapper for prove and git-bisect
 
 REQUIREMENTS
+    File::pushd
     File::Which
     IPC::Run
     List::MoreUtils
@@ -23,6 +24,9 @@ DESCRIPTION
     `BISECT_PROVE' variable set, e.g.
 
       BISECT_PROVE=1 bisect-prove -lr t/
+
+    Note that you do not need to be in the toplevel directory to run, but
+    this asusmes that the current directory is present in every commit.
 
 SEE ALSO
     * prove

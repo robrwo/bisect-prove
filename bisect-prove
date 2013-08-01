@@ -1,5 +1,7 @@
 #!/usr/bin/env perl
 
+=for license stop
+
 =head1 NAME
 
 bisect-prove - a wrapper for prove and git-bisect
@@ -44,6 +46,9 @@ the C<BISECT_PROVE> variable set, e.g.
 
   BISECT_PROVE=1 bisect-prove -lr t/
 
+Note that you do not need to be in the toplevel directory to run, but
+this asusmes that the current directory is present in every commit.
+
 =head1 SEE ALSO
 
 =over 2
@@ -62,7 +67,11 @@ L<git-bisect|http://git-scm.com/docs/git-bisect>
 
 Robert Rothenberg, C<< <rrwo at cpan.org> >>
 
-=begin readme
+=for readme stop
+
+=for license continue
+
+=begin license
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -104,7 +113,7 @@ CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
 CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-=end readme
+=end license
 
 =cut
 
