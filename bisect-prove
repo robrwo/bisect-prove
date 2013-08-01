@@ -10,6 +10,8 @@ bisect-prove - a wrapper for prove and git-bisect
 
 =over 2
 
+=item L<File::pushd>
+
 =item L<File::Which>
 
 =item L<IPC::Run>
@@ -109,8 +111,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 use strict;
 use warnings;
 
-use version 0.77; our $VERSION = version->declare('v0.3.0');
+use version 0.77; our $VERSION = version->declare('v0.3.1');
 
+use File::pushd;
 use File::Which qw/ which /;
 use IPC::Run qw/ run /;
 use List::MoreUtils qw/ any /;
@@ -126,22 +129,38 @@ my $prove = which 'prove'
 my $git = which 'git'
     or die "Cannot find 'git' in the path\n";
 
-my ($in, $out, $err);
+my ($in, $out, $err, $toplevel);
+
+{
+    run [$git, qw( rev-parse --show-toplevel )], \$in, \$toplevel, \$err;
+
+    chomp($toplevel);
+}
 
 my $checking = 1;
 
 while ($checking) {
 
+    # We could use `git bisect run` to run prove, but we need to
+    # ensure that it does not return code 125.
+
     run [$prove, @ARGV], \$in, \$out, \$err;
 
     if (my $rc = $?) {
 
-	run [$git, qw( bisect bad )], \$in, \$out, \$err;
+        my $dir = pushd($toplevel);
+
+	run [$git, qw( bisect bad )], \$in, \$out, \$err;	
+
+	die $err if ($?);
 
     } else {
 
+        my $dir = pushd($toplevel);
+
 	run [$git, qw( bisect good )], \$in, \$out, \$err;
 
+	die $err if ($?);
     }
 
     if ($out =~ /([0-9a-f]+) is the first bad commit/) {
